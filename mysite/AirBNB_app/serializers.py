@@ -73,11 +73,20 @@ class OwnerSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ['id','username', 'avatar']
 
+
+class ReviewSerializer(serializers.ModelSerializer):
+    created_date = serializers.DateTimeField(format='%d.%m.%Y')
+    class Meta:
+        model = Review
+        fields = ('id','property','rating','comment','created_date')
+
+
 class PropertyDetailSerializer(serializers.ModelSerializer):
     images = PropertyImageSerializer(many=True, read_only=True)
     city = CitySerializer()
     rules = RulesSerializer(many=True)
     owner = OwnerSerializer()
+    property_reviews = ReviewSerializer(many=True, read_only=True)
     avg_rating = serializers.SerializerMethodField()
     count_people = serializers.SerializerMethodField()
     class Meta:
@@ -85,7 +94,7 @@ class PropertyDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'price', 'city',
             'property_type', 'rules', 'max_guests','owner',
-            'images','avg_rating','count_people'
+            'images','avg_rating','count_people','property_reviews'
         ]
     def get_avg_rating(self, obj):
         return obj.get_avg_rating()
@@ -105,17 +114,9 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
     created_date = serializers.DateTimeField(format='%d.%m.%Y')
     class Meta:
         model = Review
-        fields = ['rating', 'comment', 'user', 'property','created_date']
+        fields = ['rating', 'comment', 'property','created_date']
 
-class UserProfileReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = ['avatar','first_name' ]
 
-class ReviewSerializer(serializers.ModelSerializer):
-    user = UserProfileReviewSerializer()
-    created_date = serializers.DateTimeField(format='%d.%m.%Y')
-    class Meta:
-        model = Review
-        fields = ('id','property','user','rating','comment','created_date')
+
+
 
