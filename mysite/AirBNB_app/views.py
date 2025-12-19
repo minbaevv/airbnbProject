@@ -63,8 +63,10 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfileSerializer
 
     def get_queryset(self):
-        return UserProfile.objects.filter(owner=self.request.user.id)
-
+        user = self.request.user
+        if user.is_authenticated:
+            return UserProfile.objects.filter(property__owner=user).distinct()
+        return UserProfile.objects.none()
 
 class CityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = City.objects.all()
