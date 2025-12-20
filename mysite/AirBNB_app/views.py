@@ -6,7 +6,7 @@ from .models import (UserProfile, City, Rules,
 from .models import UserProfile, City, Rules
 from .pagination import PropertyPagination
 from .serializers import (
-UserProfileSerializer,CitySerializer,
+UserProfileListSerializer,UserProfileDetailSerializer,CitySerializer,
 RulesSerializer,PropertyListSerializer,PropertyDetailSerializer,
 BookingSerializer,ReviewSerializer,ReviewCreateSerializer,UserProfileRegisterSerializer,LoginSerializer
 )
@@ -58,15 +58,19 @@ class LogoutView(generics.GenericAPIView):
 
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileListAPIView(generics.ListAPIView):
     queryset = UserProfile.objects.all()
-    serializer_class = UserProfileSerializer
+    serializer_class = UserProfileListSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            return UserProfile.objects.filter(property__owner=user).distinct()
-        return UserProfile.objects.none()
+        return UserProfile.objects.filter(id=self.request.user.id)
+
+class UserProfileDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileDetailSerializer
+
+    def get_queryset(self):
+        return UserProfile.objects.filter(id=self.request.user.id)
 
 class CityViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = City.objects.all()

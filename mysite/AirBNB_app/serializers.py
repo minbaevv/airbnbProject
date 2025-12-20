@@ -40,10 +40,15 @@ class LoginSerializer(serializers.Serializer):
 
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ('__all__')
+        fields = ['id','age','username','role','avatar']
+
+class UserProfileDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = '__all__'
 
 class PropertyImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,21 +69,30 @@ class RulesSerializer(serializers.ModelSerializer):
 class PropertyListSerializer(serializers.ModelSerializer):
     images = PropertyImageSerializer(many=True, read_only=True)
     city = CitySerializer()
+    price_two_night = serializers.SerializerMethodField()
     class Meta:
         model = Property
-        fields = ['images','property_type','city']
+        fields = ['images','property_type','city','price_two_night']
+
+    def get_price_two_night(self, obj):
+        return obj.get_price_two_night()
 
 class OwnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['id','username', 'avatar']
 
+class UserProfileReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['avatar','first_name']
 
 class ReviewSerializer(serializers.ModelSerializer):
     created_date = serializers.DateTimeField(format='%d.%m.%Y')
+    user = UserProfileReviewSerializer(read_only=True)
     class Meta:
         model = Review
-        fields = ('id','property','rating','comment','created_date')
+        fields = ('id','user','property','rating','comment','created_date')
 
 
 class PropertyDetailSerializer(serializers.ModelSerializer):
@@ -89,10 +103,11 @@ class PropertyDetailSerializer(serializers.ModelSerializer):
     property_reviews = ReviewSerializer(many=True, read_only=True)
     avg_rating = serializers.SerializerMethodField()
     count_people = serializers.SerializerMethodField()
+    price_two_night = serializers.SerializerMethodField()
     class Meta:
         model = Property
         fields = [
-            'id', 'title', 'description', 'price', 'city',
+            'id', 'title', 'description', 'price_two_night', 'city',
             'property_type', 'rules', 'max_guests','owner',
             'images','avg_rating','count_people','property_reviews'
         ]
@@ -100,6 +115,9 @@ class PropertyDetailSerializer(serializers.ModelSerializer):
         return obj.get_avg_rating()
     def get_count_people(self,obj):
         return obj.get_count_people()
+
+    def get_price_two_night(self, obj):
+        return obj.get_price_two_night()
 
 
 class BookingSerializer(serializers.ModelSerializer):

@@ -63,6 +63,9 @@ class Property(models.Model):
     def get_count_people(self):
         return self.property_reviews.count()
 
+    def get_price_two_night(self):
+        return self.price * 2
+
 class PropertyImage(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE,related_name='images')
     image = models.ImageField(upload_to='property_images')
